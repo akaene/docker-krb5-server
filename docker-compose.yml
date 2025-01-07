@@ -1,5 +1,6 @@
 volumes:
     krb5kdc-data:
+    lldap_data:
 
 services:
   kdc:
@@ -25,7 +26,21 @@ services:
     - "464:464"
     - "749:749"
     environment:
-     KRB5_REALM: EXAMPLE.COM
+     KRB5_REALM: SISEL.CAA.CZ
      KRB5_KDC: localhost
+     KRB5_PASS: passy
     volumes:
     - krb5kdc-data:/var/lib/krb5kdc
+  lldap:
+    image: lldap/lldap:stable
+    ports:
+      # For LDAP, not recommended to expose, see Usage section.
+      - "3890:3890"
+      # For the web front-end
+      - "17170:17170"
+    volumes:
+      - "lldap_data:/data"
+    environment:
+      - LLDAP_LDAP_BASE_DN=OU=Users,OU=UCL,DC=caa,DC=cz,DC=local
+      - LLDAP_LDAP_USER_DN="admin"
+      - LLDAP_LDAP_USER_PASS="passypassy"
