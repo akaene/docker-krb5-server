@@ -1,170 +1,74 @@
-↖️ Table of Contents
+# Kerberos with LLDAP for SISel
 
-<h1 align="center"><code>Krb5 Server - Docker Image</code></h1>
+This is a configuration of Kerberos and LLDAP for simulating the environment in which SISel runs at CAA.
 
-<div align="center">
-  <a href="https://github.com/gcavalcante8808/docker-krb5-server/actions/workflows/cd.yaml">
-    <img src="https://github.com/gcavalcante8808/docker-krb5-server/actions/workflows/cd.yaml/badge.svg">
-  </a>
-  <a href="https://github.com/gcavalcante8808/docker-krb5-server/actions/workflows/tests.yaml">
-    <img src="https://github.com/gcavalcante8808/docker-krb5-server/actions/workflows/tests.yaml/badge.svg">
-  </a>
-  <a href="https://www.buymeacoffee.com/gcavalcante8808">
-    <img src="https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee" alt="buy me a coffee">
-  </a>
-</div>
-<br>
 
-Krb5 Server
------------
+It uses the gcavalcante8808/krb5-server image with MIT Kerberos v5 installed with Alpine as base image.
 
-This is a gcavalcante8808/krb5-server image with MIT Kerberos v5 installed with Alpine as base image. 
 
-Daily Builds are available and linux/amd64 and linux/arm64 support.
-
-Simple Usage
-------------
-
-If you just want to create a Krb5 Server from scratch, just clone the repository and use docker compose to bring it up quickly:
+Just clone the repository and use docker compose to bring it up quickly:
 
 ```
-    cd tmp
-    git clone https://github.com/gcavalcante8808/docker-krb5-server.git
+    git clone https://github.com/akaene/docker-krb5-server.git
     cd docker-krb5-server
     docker compose up -d
 ```
+ 
+`docker-compose.yml` contains configuration of passwords and realms to use. The Kerberos realm is called `SISEL.CAA.CZ` and this file assumes this name in the remainder.
 
-By default, an anonymous volume will be created and mounted on /var/lib/krb5kdc but you can mount your own
-volume. Use the example bellow as a guide:
 
-```yml
-volumes:
-    krb5kdc-data:
+## Prerequisites
 
-services:
-   kdc:
-     image: gcavalcante8808/krb5-server
-     build: .
-     restart: always
-     ports:
-      - "88:88"
-      - "464:464"
-      - "749:749"
-     environment:
-       KRB5_REALM: EXAMPLE.COM
-       KRB5_KDC: localhost
-     volumes:
-      - krb5kdc-data:/var/lib/krb5kdc
-```
+Install the following package(s):
 
-Usage
------
+- `krb5-user`
+- `ldap-utils` - useful when you want to test querying the LDAP
 
-You need to supply the following environment variables:
 
- * KRB5_REALM (MANDATORY): Your KRB5 REALM name in Upper Case and DNS format, like EXAMPLE.COM;
- * KRB5_KDC (MANDATORY): Your KRB5 KDC Address. It's recommended that you use a TXT Dns entry, but you can use localhost for a simple installation (if you use localhost you can't setup the KDC slaves later ...);
- * KRB5_ADMINSERVER(OPTIONAL): If not provided will be the same value that was provided for KRB5_KDC;
- * KRB5_PASS: KDB and **admin** password for the database. If you don't provide this value, one will be created and printed in the first time that container is started; **write down this password, it is necessary to login with kadmin and unblock the kdb files**.
+## Usage
 
-With all this information, you can now run the container:
+Kerberos authentication does not work very nicely when using localhost, so we need to update `/etc/hosts` so that our Kerberos acts like it is running on a domain. Add the following lines to the top of `/etc/hosts`:
 
 ```
-    docker run -d --name krb5-server -e KRB5_REALM=EXAMPLE.COM -e KRB5_KDC=localhost -e KRB5_PASS=mypass -p 88:88 -p 464:464 -p 749:749 gcavalcante8808/krb5-server
+127.0.0.1	sisel.caa.cz
+127.0.0.1	kerberos.caa.cz
 ```
 
-If you haven't provided the password, find it at the logs:
+The first line is for SISel, the second line is for Kerberos authentication.
 
-```
-    docker logs krb5-server
-```
 
-To acquire a ticket from your new domain, create a krb5.conf on "/etc" with the following config:
+To acquire a ticket from the new domain, add to "/etc/krb5.conf" the following config into respective sections:
 
 ```
 [libdefaults]
+ dns_lookup_kdc = false
  dns_lookup_realm = false
- ticket_lifetime = 24h
- renew_lifetime = 7d
- forwardable = true
- rdns = false
- default_realm = YOURREALM.FQDN
+ default_realm = SISEL.CAA.CZ
  
 [realms]
- YOURREALM.FQDN = {
-    kdc = localhost
-    admin_server = localhost
+ SISEL.CAA.CZ = {
+    kdc = kerberos.caa.cz
+    admin_server = kerberos.caa.cz
  }
 
 ```
 
-By default Kerberos client on Apple laptops is having troubles to connect to KDC with following error message:
-```
-kinit admin@EXAMPLE.COM
-admin@EXAMPLE.COM's password: 
-kinit: krb5_get_init_creds: unable to reach any KDC in realm EXAMPLE.COM, tried 1 KDC
-```
-
-It happens because Kerberos client doesn't fall to TCP protocol to fix it, you have to change your krb5.conf file
-```
-[libdefaults]
- dns_lookup_realm = false
- ticket_lifetime = 24h
- renew_lifetime = 7d
- forwardable = true
- rdns = false
- default_realm = YOURREALM.FQDN
- 
-[realms]
- YOURREALM.FQDN = {
-    kdc = tcp/localhost:88
-    admin_server = tcp/localhost:749
- }
-
-```
-
-After that changes you can successfully run `kinit` command mentioned above
+After that changes you can successfully run `kinit` command mentioned above.
 
 By Default just the user admin/admin@REALM is created; to test the setup, try to acquire the ticket with the following commands:
 
 ```
-    kinit admin/admin@YOURREALM.FQDN # Will prompt for the password provided or the generated.
+    kinit admin/admin@SISEL.CAA.CZ # Will prompt for the password provided (KRB5_PASS)
     klist
 ```
 
-**The Default Kadmin policy allows all members inside /admin policy to do anything in your kerberos database(default to * perm); if you need a more simple user, you can create users with /service policy (which defaults to aci perm)**.
 
-Note About Low Entropy and Kerberos Database Creation
------------------------------------------------------
+## Sample Data
 
-If your container won't start properly and show a message like "Loading random data" for a couple minutes, it indicates that the system don't have enough entropy available to provide a secure cryptographic loop to the program.
+This repository also contains sample users for the configuration. To import them, shut down the orchestration (`docker compose down`). Copy file `data/users.db` into the LLDAP service volume (by default in `/var/lib/docker/volumes/docker-krb5-server_lldap_data/_data`). Adding users to Kerberos is fairly simple:
 
-In this case you can use rngd (will be necessary to restart the container after this):
+1. Start the orchestration so that Kerberos is available (`docker compose up -d`)
+1. Log in as admin (`kinit admin/admin@SISEL.CAA.CZ`)
+2. Add users using the `kadmin` command, for example: `kadmin addprinc -pw pass patton` adds a user with username `patton` and password `pass`
+3. You can list Kerberos users (principals) using `kadmin listprincs`
 
-```
-    /sbin/rngd
-```
-
-You can use `havaged` as well, as we can see in the digitalOcean tutorial:
-
-https://www.digitalocean.com/community/tutorials/how-to-setup-additional-entropy-for-cloud-servers-using-haveged
-
-After this, you just need to restart your container and it is g-n-go.
-
-Other Information
------------------
-
-This container uses the Krb5-Server provided by the Alpine Team. Take a look at the alpine site to verify the available versions of the package.
-
-For more information on how to configure the clients or even the server take a loot at the MIT Krb5 Documentation.
-
-Check the issues page at github if you want to contribute or profile a bug/request/enhancement.
-
-Running Tests
--------------
-
-There are a set of tests (written in python) available on the tests directory. 
-
-You run can the tests by running `make run-tests-on-docker` command.
-
-Note: By Default, it requires docker/docker-compose and make installed and working.
