@@ -78,6 +78,9 @@ ktadd -k /path/to/sisel.keytab HTTP/sisel.caa.cz@SISEL.CAA.CZ
 This generates a `sisel.keytab` file that needs to be linked by SISel's `config.properties`.
 
 
+To use SISel with Kerberos, log in as a user using `kinit` and then open SISel, the browser should automatically use the login ticket obtained by the system Kerberos client.
+
+
 
 ## Sample Data
 
@@ -87,4 +90,19 @@ This repository also contains sample users for the configuration. To import them
 1. Log in as admin (`kinit admin/admin@SISEL.CAA.CZ`)
 2. Add users using the `kadmin` command, for example: `kadmin addprinc -pw pass patton` adds a user with username `patton` and password `pass`
 3. You can list Kerberos users (principals) using `kadmin listprincs`
+
+For the aforementioned sample data, you can use the following configuration in SISel (`config.properties`):
+
+```
+sisel.kerberos.service-principal=HTTP/sisel.caa.cz@SISEL.CAA.CZ
+sisel.kerberos.keytab-location=${PATH_TO_KEYTAB_FILE}
+sisel.ldap.domain=CAA.CZ.LOCAL
+sisel.ldap.server=ldap://localhost:3890
+sisel.ldap.search-base=OU=Users,OU=UCL,DC=caa,DC=cz,DC=local
+sisel.ldap.username=uid=sisel,OU=people,OU=Users,OU=UCL,DC=caa,DC=cz,DC=local
+sisel.ldap.password=siselpassy
+sisel.ldap.search-filter=(uid={0})
+sisel.ldap.root-user=uid=hood,OU=people,OU=Users,OU=UCL,DC=caa,DC=cz,DC=local
+```
+
 
