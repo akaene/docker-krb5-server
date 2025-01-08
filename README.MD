@@ -21,7 +21,7 @@ Just clone the repository and use docker compose to bring it up quickly:
 
 Install the following package(s):
 
-- `krb5-user`
+- `krb5-user` - see [usage section](#usage) how to configure `/etc/krb5.conf` during installation process
 - `ldap-utils` - useful when you want to test querying the LDAP
 
 
@@ -37,7 +37,7 @@ Kerberos authentication does not work very nicely when using localhost, so we ne
 The first line is for SISel, the second line is for Kerberos authentication.
 
 
-To acquire a ticket from the new domain, add to "/etc/krb5.conf" the following config into respective sections:
+To acquire a ticket from the new domain, add to `/etc/krb5.conf` the following config into respective sections:
 
 ```
 [libdefaults]
