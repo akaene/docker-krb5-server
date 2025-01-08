@@ -53,7 +53,7 @@ To acquire a ticket from the new domain, add to `/etc/krb5.conf` the following c
 
 ```
 
-After that changes you can successfully run `kinit` command mentioned above.
+After that changes you can successfully run `kinit` command mentioned below.
 
 By Default just the user admin/admin@REALM is created; to test the setup, try to acquire the ticket with the following commands:
 
