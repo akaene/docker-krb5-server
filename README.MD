@@ -65,7 +65,7 @@ By Default just the user admin/admin@REALM is created; to test the setup, try to
 
 ## Sample Data
 
-This repository also contains sample users for the configuration. To import them, shut down the orchestration (`docker compose down`). Copy file `data/users.db` into the LLDAP service volume (by default in `/var/lib/docker/volumes/docker-krb5-server_lldap_data/_data`). Adding users to Kerberos is fairly simple:
+This repository also contains sample users for the configuration. To import them, shut down the orchestration (`docker compose down`). Copy file `users.db` into the LLDAP service volume (by default in `/var/lib/docker/volumes/docker-krb5-server_lldap_data/_data`). Adding users to Kerberos is fairly simple:
 
 1. Start the orchestration so that Kerberos is available (`docker compose up -d`)
 1. Log in as admin (`kinit admin/admin@SISEL.CAA.CZ`)
