@@ -58,7 +58,7 @@ After that changes you can successfully run `kinit` command mentioned below.
 By Default just the user admin/admin@REALM is created; to test the setup, try to acquire the ticket with the following commands:
 
 ```
-    kinit admin/admin@SISEL.CAA.CZ # Will prompt for the password provided (see KRB5_PASS enviroment variable withing docker-compose.yml)
+    kinit admin/admin@SISEL.CAA.CZ # Will prompt for the password provided (see KRB5_PASS in docker-compose.yml)
     klist
 ```
 
