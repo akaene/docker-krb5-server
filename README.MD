@@ -62,6 +62,22 @@ By Default just the user admin/admin@REALM is created; to test the setup, try to
     klist
 ```
 
+Now add a principal that will be used by SISel:
+
+```
+addprinc -randkey HTTP/sisel.caa.cz@SISEL.CAA.CZ
+```
+
+
+To integrate SISel with Kerberos, you will need a _keytab_ file for the SISel principal. Run:
+
+```
+ktadd -k /path/to/sisel.keytab HTTP/sisel.caa.cz@SISEL.CAA.CZ
+```
+
+This generates a `sisel.keytab` file that needs to be linked by SISel's `config.properties`.
+
+
 
 ## Sample Data
 
