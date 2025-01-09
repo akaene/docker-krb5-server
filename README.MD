@@ -78,11 +78,10 @@ kadmin ktadd -k /path/to/sisel.keytab HTTP/sisel.caa.cz@SISEL.CAA.CZ
 This generates a `sisel.keytab` file that needs to be linked by SISel's `config.properties`.
 
 
-To use SISel with Kerberos, log in as a user using `kinit` and then open SISel, the browser should automatically use the login ticket obtained by the system Kerberos client. Note, that in order to access it from Chrome browser you should define appropriate policy file, e.g. `/etc/opt/chrome/policies/managed/sisel.json` with content:
+To use SISel with Kerberos, log in as a user using `kinit` and then open SISel, the browser should automatically use the login ticket obtained by the system Kerberos client. Note, that in order to access it from Chrome browser you should define appropriate policy file, e.g. `/etc/opt/chrome/policies/managed/kerberos.json` with content:
 ```
 {
-  "AuthServerAllowlist": "*.caa.cz",
-  "AuthNegotiateDelegateAllowlist": "*.caa.cz"
+    "AuthServerAllowlist": "*.caa.cz"
 }
 ```
 
