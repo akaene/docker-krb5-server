@@ -105,4 +105,10 @@ sisel.ldap.search-filter=(uid={0})
 sisel.ldap.root-user=uid=hood,OU=people,OU=Users,OU=UCL,DC=caa,DC=cz,DC=local
 ```
 
+### Scripts
+
+Script `./bin/initialize-sample-data.sh` follows instructions above and:
+- deploys sample data to ldap
+- adds relevant KDC users
+- creates SISel keytab
 
