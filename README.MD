@@ -68,7 +68,6 @@ Now add a principal that will be used by SISel:
 kadmin addprinc -randkey HTTP/sisel.caa.cz@SISEL.CAA.CZ
 ```
 
-
 To integrate SISel with Kerberos, you will need a _keytab_ file for the SISel principal. Run:
 
 ```
@@ -77,7 +76,7 @@ kadmin ktadd -k /path/to/sisel.keytab HTTP/sisel.caa.cz@SISEL.CAA.CZ
 
 This generates a `sisel.keytab` file that needs to be linked by SISel's `config.properties`.
 
-
+#### Accessing via browser
 To use SISel with Kerberos, log in as a user using `kinit` and then open SISel, the browser should automatically use the login ticket obtained by the system Kerberos client. Note, that in order to access it from Chrome browser you should define appropriate policy file, e.g. `/etc/opt/chrome/policies/managed/kerberos.json` with content:
 ```
 {
@@ -85,6 +84,8 @@ To use SISel with Kerberos, log in as a user using `kinit` and then open SISel, 
 }
 ```
 
+#### Accessing via ApiDog
+Postman has no Kerberos support, but ApiDog has. It is enough to set SPN to 'HTTP@SISEL.CAA.CZ' (note the difference to the SISel configuration).
 
 ## Sample Data
 
